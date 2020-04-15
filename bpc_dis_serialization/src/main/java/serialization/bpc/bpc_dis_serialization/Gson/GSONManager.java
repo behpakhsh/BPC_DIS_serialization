@@ -20,8 +20,7 @@ public class GSONManager {
 
     private static Gson getGson() {
         if (gson == null) {
-            gson = new Gson();
-            gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").create();
+            gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss").create();
         }
         return gson;
     }
