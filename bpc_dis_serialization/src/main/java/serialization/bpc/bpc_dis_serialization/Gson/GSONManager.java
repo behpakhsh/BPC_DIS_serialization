@@ -16,13 +16,8 @@ import java.util.List;
 
 public class GSONManager {
 
-    private static Gson gson;
-
-    private static Gson getGson() {
-        if (gson == null) {
-            gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss").create();
-        }
-        return gson;
+    public static Gson getGson() {
+        return new GsonBuilder().create();
     }
 
     public static <T> String toJson(T obj) {
