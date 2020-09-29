@@ -126,7 +126,7 @@ public class GSONManager {
     }
 
     public static Gson getGson() {
-        return new GsonBuilder().create();
+        return gsonWithDateSerializer();
     }
 
     public static <T> String toJson(T obj) {
