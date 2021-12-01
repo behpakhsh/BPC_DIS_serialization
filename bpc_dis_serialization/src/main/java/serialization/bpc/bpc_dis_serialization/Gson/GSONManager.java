@@ -64,13 +64,26 @@ public class GSONManager {
         return builder.create();
     }
 
-    public static Gson getGson() {
-        return gsonWithDateSerializer();
+    private static List<String> getDefaultPattern() {
+        List<String> patterns = new ArrayList<>();
+        patterns.add("yyyy-MM-dd");
+        patterns.add("yyyy-MM-dd HH:mm:ssZ");
+        patterns.add("yyyy-MM-dd HH:mm:ss");
+        patterns.add("yyyy-MM-dd'T'HH:mm:ss");
+        return patterns;
     }
 
-    public static Gson getDefaultGson() {
-        GsonBuilder builder = new GsonBuilder();
-        return builder.create();
+    public static List<String> getSimpleDatePattern() {
+        return simpleDatePattern;
+    }
+
+    public static void setSimpleDatePattern(List<String> simpleDatePattern) {
+        GSONManager.simpleDatePattern = simpleDatePattern;
+    }
+
+
+    public static Gson getGson() {
+        return gsonWithDateSerializer();
     }
 
     public static <T> String toJson(T obj) {
@@ -120,21 +133,57 @@ public class GSONManager {
         }
     }
 
-    private static List<String> getDefaultPattern() {
-        List<String> patterns = new ArrayList<>();
-        patterns.add("yyyy-MM-dd");
-        patterns.add("yyyy-MM-dd HH:mm:ssZ");
-        patterns.add("yyyy-MM-dd HH:mm:ss");
-        patterns.add("yyyy-MM-dd'T'HH:mm:ss");
-        return patterns;
+
+    public static Gson getDefaultGson() {
+        GsonBuilder builder = new GsonBuilder();
+        return builder.create();
     }
 
-    public static List<String> getSimpleDatePattern() {
-        return simpleDatePattern;
+    public static <T> String toJsonDefault(T obj) {
+        try {
+            return getDefaultGson().toJson(obj);
+        } catch (Exception ex) {
+            return "";
+        }
     }
 
-    public static void setSimpleDatePattern(List<String> simpleDatePattern) {
-        GSONManager.simpleDatePattern = simpleDatePattern;
+    public static <T> T fromJsonDefault(String json, Class<T> classOfT) {
+        return getDefaultGson().fromJson(json, classOfT);
+    }
+
+    public static <T> T fromJsonDefault(String json, Type typeOf) {
+        return getDefaultGson().fromJson(json, typeOf);
+    }
+
+    public static <T> List<T> fromJsonListDefault(String json, Class<T> clazz) {
+        Object[] array = (Object[]) java.lang.reflect.Array.newInstance(clazz, 0);
+        array = getDefaultGson().fromJson(json, array.getClass());
+        List<T> list = new ArrayList<>();
+        for (Object o : array)
+            list.add(clazz.cast(o));
+        return list;
+    }
+
+    public static <T> JsonObject convertObjectToJsonObjectDefault(T obj) {
+        String jsonString = getDefaultGson().toJson(obj);
+        JsonParser jsonParser = new JsonParser();
+        try {
+            return (JsonObject) jsonParser.parse((new JSONObject(jsonString)).toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return new JsonObject();
+        }
+    }
+
+    public static <T> JsonArray convertArrayToJsonArrayDefault(List<T> obj) {
+        String jsonString = getDefaultGson().toJson(obj);
+        JsonParser jsonParser = new JsonParser();
+        try {
+            return (JsonArray) jsonParser.parse((new JSONArray(jsonString)).toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return new JsonArray();
+        }
     }
 
 }
