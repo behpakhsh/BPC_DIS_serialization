@@ -23,110 +23,54 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+@SuppressLint("SimpleDateFormat")
 public class GSONManager {
 
-    @SuppressLint("SimpleDateFormat")
+    private static List<String> simpleDatePattern = new ArrayList<>();
+
     public static Gson gsonWithDateSerializer() {
 
+        if (simpleDatePattern.isEmpty()) {
+            simpleDatePattern = getDefaultPattern();
+        }
+
         GsonBuilder builder = new GsonBuilder();
+        for (final String pattern : simpleDatePattern) {
+            builder.registerTypeAdapter(Date.class, new JsonDeserializer<Date>() {
 
-        builder.registerTypeAdapter(Date.class, new JsonDeserializer<Date>() {
+                final DateFormat df = new SimpleDateFormat(pattern);
 
-            final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-
-            @Override
-            public Date deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-                try {
-                    if (json != null) {
-                        if (json.getAsString() != null) {
-                            Date parse = df.parse(json.getAsString());
-                            if (parse != null) {
-                                return new SerializableDateTime(parse);
+                @Override
+                public Date deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+                    try {
+                        if (json != null) {
+                            if (json.getAsString() != null) {
+                                Date parse = df.parse(json.getAsString());
+                                if (parse != null) {
+                                    return new SerializableDateTime(parse);
+                                }
                             }
                         }
+                        return null;
+                    } catch (final java.text.ParseException e) {
+                        e.printStackTrace();
+                        return null;
                     }
-                    return null;
-                } catch (final java.text.ParseException e) {
-                    e.printStackTrace();
-                    return null;
                 }
-            }
-        });
 
-        builder.registerTypeAdapter(SerializableDateTime.class, new JsonDeserializer<SerializableDateTime>() {
-
-            final DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ");
-
-            @Override
-            public SerializableDateTime deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-                try {
-                    if (json != null) {
-                        if (json.getAsString() != null) {
-                            Date parse = df.parse(json.getAsString());
-                            if (parse != null) {
-                                return new SerializableDateTime(parse);
-                            }
-                        }
-                    }
-                    return null;
-                } catch (final java.text.ParseException e) {
-                    e.printStackTrace();
-                    return null;
-                }
-            }
-        });
-
-        builder.registerTypeAdapter(SerializableDateTime.class, new JsonDeserializer<SerializableDateTime>() {
-
-            final DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-            @Override
-            public SerializableDateTime deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-                try {
-                    if (json != null) {
-                        if (json.getAsString() != null) {
-                            Date parse = df.parse(json.getAsString());
-                            if (parse != null) {
-                                return new SerializableDateTime(parse);
-                            }
-                        }
-                    }
-                    return null;
-                } catch (final java.text.ParseException e) {
-                    e.printStackTrace();
-                    return null;
-                }
-            }
-        });
-
-        builder.registerTypeAdapter(SerializableDateTime.class, new JsonDeserializer<SerializableDateTime>() {
-
-            final DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-
-            @Override
-            public SerializableDateTime deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-                try {
-                    if (json != null) {
-                        if (json.getAsString() != null) {
-                            Date parse = df.parse(json.getAsString());
-                            if (parse != null) {
-                                return new SerializableDateTime(parse);
-                            }
-                        }
-                    }
-                    return null;
-                } catch (final java.text.ParseException e) {
-                    e.printStackTrace();
-                    return null;
-                }
-            }
-        });
+            });
+        }
 
         return builder.create();
     }
 
     public static Gson getGson() {
         return gsonWithDateSerializer();
+    }
+
+    public static Gson getDefaultGson() {
+        GsonBuilder builder = new GsonBuilder();
+        return builder.create();
     }
 
     public static <T> String toJson(T obj) {
@@ -174,6 +118,23 @@ public class GSONManager {
             e.printStackTrace();
             return new JsonArray();
         }
+    }
+
+    private static List<String> getDefaultPattern() {
+        List<String> patterns = new ArrayList<>();
+        patterns.add("yyyy-MM-dd");
+        patterns.add("yyyy-MM-dd HH:mm:ssZ");
+        patterns.add("yyyy-MM-dd HH:mm:ss");
+        patterns.add("yyyy-MM-dd'T'HH:mm:ss");
+        return patterns;
+    }
+
+    public static List<String> getSimpleDatePattern() {
+        return simpleDatePattern;
+    }
+
+    public static void setSimpleDatePattern(List<String> simpleDatePattern) {
+        GSONManager.simpleDatePattern = simpleDatePattern;
     }
 
 }
